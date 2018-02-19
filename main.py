@@ -27,6 +27,8 @@ try:
 
     edgearray = np.zeros((video.height, video.width), dtype=np.float32) #Empty array for edgemap
     edgearray = edgeGenerator.detectEdges(video.currentframe) #process current frame
+    orientationarray = np.zeros((video.height, video.width), dtype=np.float32) #Empty array for orientation emap
+    orientationarray = edgeGenerator.computeOrientation(edgearray)
 
     fps = 1/(time.time()-beginning)
     print("FPS: ", fps)
