@@ -12,14 +12,12 @@ modelfile = "model.yml.gz" #StructuredEdgeDetection model (generates edgemap)
 video = reader(file)
 videoThread = threading.Thread(target=video.read)
 videoThread.daemon = True
-videoThread.start()
-video.execute = True #Get frame ready
+videoThread.start() #starts with a frame ready
 
 Generator = generator(modelfile, video)
 generatorThread = threading.Thread(target=Generator.generate)
 generatorThread.daemon = True
-generatorThread.start()
-Generator.execute = True #get edgemap ready
+generatorThread.start() #starts with first maps ready
 
 boxGenerator = cv2.ximgproc.createEdgeBoxes(maxBoxes = 50, alpha = 0.5)
 
@@ -41,9 +39,6 @@ try:
 
     frames = frames + 1
     total_fps = total_fps + fps
-
-    cv2.imshow("image", draw_boxes(boxes, Generator.current_edgearray))
-    cv2.waitKey(100)
 
 except KeyboardInterrupt:
     exit(total_fps/frames)
