@@ -19,7 +19,7 @@ Generator = generator(modelfile, video)
 generatorThread = threading.Thread(target=Generator.generate)
 generatorThread.daemon = True
 generatorThread.start()
-Generator.execute = True
+Generator.execute = True #get edgemap ready
 
 boxGenerator = cv2.ximgproc.createEdgeBoxes(maxBoxes = 50, alpha = 0.5)
 
@@ -32,6 +32,7 @@ try:
     beginning = time.time() #For FPS calculations
 
     Generator.execute = True #start computing next edgemap and orientationmap
+    print("waiting...")
     while frames >= Generator.frame: continue #wait for next maps to be generated
     boxes = boxGenerator.getBoundingBoxes(Generator.current_edgearray, Generator.current_orientationarray)
 
