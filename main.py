@@ -15,6 +15,8 @@ videoThread.start()
 print("Loading model...")
 edgeGenerator = cv2.ximgproc.createStructuredEdgeDetection(model = modelfile)
 
+boxGenerator = cv2.ximgproc.createEdgeBoxes()
+
 frames = 0
 total_fps = 0
 
@@ -29,6 +31,8 @@ try:
     edgearray = edgeGenerator.detectEdges(video.currentframe) #process current frame
     orientationarray = np.zeros((video.height, video.width), dtype=np.float32) #Empty array for orientation emap
     orientationarray = edgeGenerator.computeOrientation(edgearray)
+
+    boxes = boxGenerator.getBoundingBoxes(edgearray, orientationarray)
 
     fps = 1/(time.time()-beginning)
     print("FPS: ", fps)
