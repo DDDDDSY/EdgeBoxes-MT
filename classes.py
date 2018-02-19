@@ -15,8 +15,6 @@ class reader:
         self.frame = self.frame.astype(np.float32)
         self.frame = np.apply_along_axis(self.normalize, 0, self.frame)
 
-        self.execute = True #Run once to prepare self.currentframe
-
     def normalize(self, a): #Normalize to a float in [0,1]
         return np.float32(a/255)
 
@@ -35,9 +33,9 @@ class reader:
 
 class generator:
 
-    def __init__(self, modelfile, reader):
+    def __init__(self, modelfile, video):
 
-        self.reader = reader #multimedia reader
+        self.Reader = video #multimedia reader
 
         print("Loading model0...")
         self.edgeGenerator0 = cv2.ximgproc.createStructuredEdgeDetection(model = modelfile)
@@ -81,8 +79,8 @@ class generator:
     def _generate0(self):
       while True:
         while not self.run0: continue
-        edgearray0 = self.edgeGenerator0.detectEdges(self.reader.currentframe)
-        self.reader.execute = True
+        edgearray0 = self.edgeGenerator0.detectEdges(self.Reader.currentframe)
+        self.Reader.execute = True
         self.orientationarray0 = self.edgeGenerator0.computeOrientation(edgearray0)
         self.suppressed_edgearray0 = self.edgeGenerator0.edgesNms(edgearray0, self.orientationarray0)
         self.run0 = False
@@ -90,8 +88,8 @@ class generator:
     def _generate1(self):
       while True:
         while not self.run1: continue
-        edgearray1 = self.edgeGenerator1.detectEdges(self.reader.currentframe)
-        self.reader.execute = True
+        edgearray1 = self.edgeGenerator1.detectEdges(self.Reader.currentframe)
+        self.Reader.execute = True
         self.orientationarray1 = self.edgeGenerator1.computeOrientation(edgearray1)
         self.suppressed_edgearray1 = self.edgeGenerator1.edgesNms(edgearray1, self.orientationarray1)
         self.run1 = False
