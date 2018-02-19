@@ -4,6 +4,7 @@ import threading
 import time
 
 from classes import reader
+from functions import draw_boxes
 
 file = "video.mp4"
 modelfile = "model.yml.gz" #StructuredEdgeDetection model (generates edgemap)
@@ -38,6 +39,10 @@ try:
 
     frames = frames + 1
     total_fps = total_fps + fps
+
+    frame = draw_boxes(boxes, edgearray)
+    cv2.imshow('image', frame)
+    cv2.waitKey(1)
 
 except KeyboardInterrupt:
     exit(total_fps/frames)
