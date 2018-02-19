@@ -39,8 +39,9 @@ class generator:
 
         self.reader = reader #multimedia reader
 
-        print("Loading model...")
+        print("Loading model0...")
         self.edgeGenerator0 = cv2.ximgproc.createStructuredEdgeDetection(model = modelfile)
+        print("Loading model1...")
         self.edgeGenerator1 = cv2.ximgproc.createStructuredEdgeDetection(model = modelfile)
 
         self.run0 = True #flags controlling generate threads
@@ -51,8 +52,10 @@ class generator:
         Thread0.daemon = True
         Thread1.daemon = True
         Thread0.start()
+        print("initializing map0...")
         while self.run0: continue #wait for first thread to create map
         Thread1.start()
+        print("initializing map1...")
         while self.run1: continue #wait for second thread to create map
 
         self.execute = True #flags controlling this thread

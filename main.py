@@ -30,7 +30,7 @@ try:
     beginning = time.time() #For FPS calculations
 
     Generator.execute = True #start computing next edgemap and orientationmap
-    print("waiting...")
+    if frames >= Generator.frame: print("waiting for map...")
     while frames >= Generator.frame: continue #wait for next maps to be generated
     boxes = boxGenerator.getBoundingBoxes(Generator.current_edgearray, Generator.current_orientationarray)
 
