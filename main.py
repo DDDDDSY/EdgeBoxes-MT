@@ -11,6 +11,7 @@ modelfile = "model.yml.gz" #StructuredEdgeDetection model (generates edgemap)
 video = reader(file)
 videoThread = threading.Thread(target=video.read)
 videoThread.start()
+video.execute = True #Get frame ready
 
 print("Loading model...")
 edgeGenerator = cv2.ximgproc.createStructuredEdgeDetection(model = modelfile)
@@ -25,14 +26,12 @@ try:
 
     beginning = time.time() #For FPS calculations
 
-    video.execute = True #Start reading next frame
-
-    edgearray = np.zeros((video.height, video.width), dtype=np.float32) #Empty array for edgemap
     edgearray = edgeGenerator.detectEdges(video.currentframe) #process current frame
-    orientationarray = np.zeros((video.height, video.width), dtype=np.float32) #Empty array for orientation emap
+    video.execute = True #read for next loop iteration
     orientationarray = edgeGenerator.computeOrientation(edgearray)
+    suppressed_edgearray = edgeGenerator.edgesNms(edgearray, orientationarray)
 
-    boxes = boxGenerator.getBoundingBoxes(edgearray, orientationarray)
+    boxes = boxGenerator.getBoundingBoxes(suppressed_edgearray, orientationarray)
 
     fps = 1/(time.time()-beginning)
     print("FPS: ", fps)
