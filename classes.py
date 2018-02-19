@@ -13,10 +13,7 @@ class reader:
         #Prepare frame buffer
         _, self.frame = self.video_capture.read()
         self.frame = self.frame.astype(np.float32)
-        self.frame = np.apply_along_axis(self.normalize, 0, self.frame)
-
-    def normalize(self, a): #Normalize to a float in [0,1]
-        return np.float32(a/255)
+        self.frame = np.divide(self.frame, 255.0)
 
     def read(self):
       while True:
@@ -27,9 +24,10 @@ class reader:
             exit("End of video file!")
 
         self.frame = self.frame.astype(np.float32) #Change type to be compatible with edgeDetect
-        self.frame = np.apply_along_axis(self.normalize, 0, self.frame) #Apply normalize function over array
+        self.frame = np.divide(self.frame, 255.0) #Normalize to [0,1]
         self.execute = False
 
+        print(self.currentframe[100][100])
 
 class generator:
 
