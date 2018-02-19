@@ -18,6 +18,7 @@ class reader:
         return np.float32(a/255)
 
     def read(self):
+      while True:
         while not self.execute: continue #wait for main thread
         self.currentframe = self.frame
         _, self.frame = self.video_capture.read()
