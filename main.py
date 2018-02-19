@@ -12,7 +12,8 @@ modelfile = "model.yml.gz" #StructuredEdgeDetection model (generates edgemap)
 video = reader(file)
 videoThread = threading.Thread(target=video.read)
 videoThread.daemon = True
-videoThread.start() #starts with a frame ready
+videoThread.start()
+video.execute = True #starts with a frame ready
 
 Generator = generator(modelfile, video)
 generatorThread = threading.Thread(target=Generator.generate)
