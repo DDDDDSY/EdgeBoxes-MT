@@ -27,8 +27,6 @@ class reader:
         self.frame = np.divide(self.frame, 255.0) #Normalize to [0,1]
         self.execute = False
 
-        print(self.currentframe[100][100])
-
 class generator:
 
     def __init__(self, modelfile, video):
