@@ -56,5 +56,9 @@ try:
     frames = frames + 1
     total_fps = total_fps + fps
 
+    if video.frame is None:
+        print("End of Video File!")
+        exit(total_fps/frames)
+
 except KeyboardInterrupt:
     exit(total_fps/frames)
