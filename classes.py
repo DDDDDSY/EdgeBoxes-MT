@@ -39,9 +39,9 @@ class generator:
         print("Loading model0...")
         self.edgeGenerator0 = cv2.ximgproc.createStructuredEdgeDetection(model = modelfile)
         print("Loading model1...")
-        self.edgeGenerator1 = cv2.ximgproc.createStructuredEdgeDetection(model = modelfile)
+        #self.edgeGenerator1 = cv2.ximgproc.createStructuredEdgeDetection(model = modelfile)
         print("Loading model2...")
-        self.edgeGenerator2 = cv2.ximgproc.createStructuredEdgeDetection(model = modelfile)
+        #self.edgeGenerator2 = cv2.ximgproc.createStructuredEdgeDetection(model = modelfile)
 
         self.frame = 0 #Frame count
 
@@ -61,15 +61,15 @@ class generator:
 
         Thread1 = threading.Thread(target=self._generate1)
         Thread1.daemon = True
-        Thread1.start()
+        #Thread1.start()
         print("initializing map1...")
-        while not self.ready1: continue #wait for second thread to create map
+        #while not self.ready1: continue #wait for second thread to create map
 
         Thread2 = threading.Thread(target=self._generate2)
         Thread2.daemon = True
-        Thread2.start()
+        #Thread2.start()
         print("initializing map2...")
-        while not self.ready2: continue #wait for third thread to create map
+        #while not self.ready2: continue #wait for third thread to create map
 
         self.execute = False #flags controlling this thread
         self.threadnum = 0
@@ -85,7 +85,7 @@ class generator:
             self.current_orientationarray = self.orientationarray0.copy()
             self.run0 = True
             self.frame = self.frame + 1
-            self.threadnum = 1
+            self.threadnum = 0
 
         elif self.threadnum == 1: #Thread1
             while not self.ready1: continue
