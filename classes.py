@@ -35,32 +35,79 @@ class generator:
     def __init__(self, modelfile, video):
 
         self.Reader = video #multimedia reader
+        self.Reader.execute = True
         
-        print("Loading model0...")
+        print("Loading model...")
         self.edgeGenerator = cv2.ximgproc.createStructuredEdgeDetection(model = modelfile)
         self.queue0 = Queue()
-
-        self.frame = 0 #Frame count
-        self.execute = False #flags controlling this thread
-        self.threadnum = 0
+        self.queue1 = Queue()
         
-        self.Reader.execute = True
+        
+        ### INITIALIZE THREADS ###
+        self.Thread0 = Process(target=self._generate,
+                       args=(self.edgeGenerator, self.Reader.currentframe, self.queue0,),
+                        daemon = True)
+        print("Thread0 Initializing")
+        self.Thread0.start()
+        self.Reader.execute = self.queue0.get() 
+        self.current_edgearray0 = self.queue0.get()
+        self.current_orientationarray0 = self.queue0.get()
+        self.Thread0.join(5) #exit if hangs for more than 5 seconds
+        
+        self.Thread1 = Process(target=self._generate,
+                       args=(self.edgeGenerator, self.Reader.currentframe, self.queue1,),
+                       daemon = True)
+        print("Thread1 Initializing")
+        self.Thread1.start()
+        self.Reader.execute = self.queue1.get() 
+        self.current_edgearray1 = self.queue1.get()
+        self.current_orientationarray1 = self.queue1.get()
+        self.Thread1.join(5) #exit if hangs for more than 5 seconds
+        ### END INITIALIZATION
+        
+        
+        self.frame = 1 #Frame count
+        self.execute = False #flags controlling this thread
+        self.threadnum = 1 #Start on thread 1 since thread 0 has data
 
     def generate(self):
       while True: #continuously execute
         while not self.execute: continue
 
-        Thread0 = Process(target=self._generate,
-                          args=(self.edgeGenerator, self.Reader.currentframe, self.queue0,),
-                          daemon = True)
-        print("Thread0 Start")
-        Thread0.start()
-        self.Reader.execute = self.queue0.get()
-        self.current_edgearray = self.queue0.get()
-        self.current_orientationarray = self.queue0.get()
-        Thread0.join(5) #exit if hangs for more than 5 seconds
+        if self.threadnum == 0: #Thread 0
+        
+            self.current_edgearray = self.current_edgearray0
+            self.current_orientationarray = self.current_orientationarray0
+            self.execute = False
+            
+            self.Thread0.join(5) #exit if hangs for more than 5 seconds
+            self.Thread0 = Process(target=self._generate,
+                           args=(self.edgeGenerator, self.Reader.currentframe, self.queue0,),
+                           daemon = True)
+            print("Thread0 Start")
+            self.Thread0.start()
+            self.Reader.execute = self.queue0.get()
+            self.current_edgearray0 = self.queue0.get()
+            self.current_orientationarray0 = self.queue0.get()
+            self.threadnum = 0
 
-        self.execute = False
+        elif self.threadnum == 1: #Thread 1
+        
+            self.current_edgearray = self.current_edgearray1
+            self.current_orientationarray = self.current_orientationarray1
+            self.execute = False
+            
+            self.Thread1.join(5) #exit if hangs for more than 5 seconds
+            self.Thread1 = Process(target=self._generate,
+                           args=(self.edgeGenerator, self.Reader.currentframe, self.queue1,),
+                           daemon = True)
+            print("Thread1 Start")
+            self.Thread1.start()
+            self.Reader.execute = self.queue1.get()
+            self.current_edgearray1 = self.queue1.get()
+            self.current_orientationarray1 = self.queue1.get()
+            self.threadnum = 0
+
         
     def _generate(self, edgeGenerator, currentframe, q):
         edgearray = edgeGenerator.detectEdges(currentframe)
