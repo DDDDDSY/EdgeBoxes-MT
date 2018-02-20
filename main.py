@@ -38,11 +38,11 @@ try:
     #box[0] x1, box[1] x2, box[2] width, box[3] height
     Generator.execute = True
 
-    cv2.imshow('image', Generator.current_edgearray)
-    cv2.waitKey(10)
-
     fps = 1/(time.time()-beginning)
     print("FPS: ", fps)
+
+    cv2.imshow('image', Generator.current_edgearray)
+    cv2.waitKey(10)
 
     frames = frames + 1
     total_fps = total_fps + fps
