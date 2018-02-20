@@ -89,7 +89,7 @@ class generator:
             self.Reader.execute = self.queue0.get()
             self.current_edgearray0 = self.queue0.get()
             self.current_orientationarray0 = self.queue0.get()
-            self.threadnum = 0
+            self.threadnum = 1
 
         elif self.threadnum == 1: #Thread 1
         
@@ -108,7 +108,6 @@ class generator:
             self.current_orientationarray1 = self.queue1.get()
             self.threadnum = 0
 
-        
     def _generate(self, edgeGenerator, currentframe, q):
         edgearray = edgeGenerator.detectEdges(currentframe)
         q.put(True) #Execute next frame read
