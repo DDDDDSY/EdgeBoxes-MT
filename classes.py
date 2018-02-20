@@ -53,11 +53,12 @@ class generator:
         Thread0 = Process(target=self._generate0,
                           args=(self.edgeGenerator0, self.Reader.currentframe, queue,),
                           daemon = True)
+        print("Thread0 Start")
         Thread0.start()
         self.Reader.execute = queue.get()
         self.current_edgearray = queue.get()
         self.current_orientationarray = queue.get()
-        Thread0.join()
+        Thread0.join(5) #exit if hangs for more than 5 seconds
 
         self.execute = False
 
