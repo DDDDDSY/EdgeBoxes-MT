@@ -37,7 +37,8 @@ class generator:
         self.Reader = video #multimedia reader
         
         print("Loading model0...")
-        self.edgeGenerator0 = cv2.ximgproc.createStructuredEdgeDetection(model = modelfile)
+        self.edgeGenerator = cv2.ximgproc.createStructuredEdgeDetection(model = modelfile)
+        self.queue0 = Queue()
 
         self.frame = 0 #Frame count
         self.execute = False #flags controlling this thread
@@ -49,23 +50,22 @@ class generator:
       while True: #continuously execute
         while not self.execute: continue
 
-        queue = Queue()
-        Thread0 = Process(target=self._generate0,
-                          args=(self.edgeGenerator0, self.Reader.currentframe, queue,),
+        Thread0 = Process(target=self._generate,
+                          args=(self.edgeGenerator, self.Reader.currentframe, self.queue0,),
                           daemon = True)
         print("Thread0 Start")
         Thread0.start()
-        self.Reader.execute = queue.get()
-        self.current_edgearray = queue.get()
-        self.current_orientationarray = queue.get()
+        self.Reader.execute = self.queue0.get()
+        self.current_edgearray = self.queue0.get()
+        self.current_orientationarray = self.queue0.get()
         Thread0.join(5) #exit if hangs for more than 5 seconds
 
         self.execute = False
-
-    def _generate0(self, edgeGenerator0, currentframe, q):
-        edgearray0 = edgeGenerator0.detectEdges(currentframe)
+        
+    def _generate(self, edgeGenerator, currentframe, q):
+        edgearray = edgeGenerator.detectEdges(currentframe)
         q.put(True) #Execute next frame read
-        orientationarray0 = edgeGenerator0.computeOrientation(edgearray0)
-        suppressed_edgearray0 = edgeGenerator0.edgesNms(edgearray0, orientationarray0)
-        q.put(suppressed_edgearray0)
-        q.put(orientationarray0)
+        orientationarray = edgeGenerator.computeOrientation(edgearray)
+        suppressed_edgearray = edgeGenerator.edgesNms(edgearray, orientationarray)
+        q.put(suppressed_edgearray)
+        q.put(orientationarray)
