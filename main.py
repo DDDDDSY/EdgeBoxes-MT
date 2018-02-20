@@ -23,7 +23,7 @@ generatorThread.start() #starts with first maps ready
 boxGenerator = cv2.ximgproc.createEdgeBoxes(maxBoxes = 1000,
                                             alpha = 0.65,
                                             beta = 0.75,
-                                            minScore = 0.02)
+                                            minScore = 0.03)
 
 frames = 0
 total_fps = 0
@@ -51,9 +51,6 @@ try:
     if visualize:
       frame = draw_boxes(boxes, Generator.current_edgearray)
       cv2.imshow('image', frame)
-      cv2.waitKey(10)
-    else:
-      cv2.imshow('image', Generator.current_edgearray)
       cv2.waitKey(10)
 
     frames = frames + 1
