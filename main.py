@@ -20,20 +20,26 @@ generatorThread = threading.Thread(target=Generator.generate)
 generatorThread.daemon = True
 generatorThread.start() #starts with first maps ready
 
-boxGenerator = cv2.ximgproc.createEdgeBoxes(maxBoxes = 50, alpha = 0.5)
+boxGenerator = cv2.ximgproc.createEdgeBoxes(maxBoxes = 1000, alpha = 0.5)
 
 frames = 0
 total_fps = 0
+
+Generator.execute = True
 
 try:
   while True:
 
     beginning = time.time() #For FPS calculations
 
-    Generator.execute = True #start computing next edgemap and orientationmap
-    if frames >= Generator.frame: print("waiting for map...")
-    while frames >= Generator.frame: continue #wait for next maps to be generated
+    if Generator.execute: print("waiting...")
+    while Generator.execute: continue
     boxes = boxGenerator.getBoundingBoxes(Generator.current_edgearray, Generator.current_orientationarray)
+    #box[0] x1, box[1] x2, box[2] width, box[3] height
+    Generator.execute = True
+
+    cv2.imshow('image', Generator.current_edgearray)
+    cv2.waitKey(10)
 
     fps = 1/(time.time()-beginning)
     print("FPS: ", fps)
