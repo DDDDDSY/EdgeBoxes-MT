@@ -21,8 +21,8 @@ generatorThread.daemon = True
 generatorThread.start() #starts with first maps ready
 
 boxGenerator = cv2.ximgproc.createEdgeBoxes(maxBoxes = 1000,
-                                            alpha = 0.6,
-                                            beta = 0.55,
+                                            alpha = 0.65,
+                                            beta = 0.75,
                                             minScore = 0.02)
 
 frames = 0
@@ -37,12 +37,15 @@ try:
 
     if Generator.execute: print("waiting...")
     while Generator.execute: continue
+    beginning = time.time()
     boxes = boxGenerator.getBoundingBoxes(Generator.current_edgearray, Generator.current_orientationarray)
     #box[0] x1, box[1] x2, box[2] width, box[3] height
+    print("BEx: ", round(time.time()-beginning, 3))
+    print("BBs: ", len(boxes))
     Generator.execute = True
 
     fps = 1/(time.time()-beginning)
-    print("FPS: ", fps)
+    print("FPS: ", fps, "\n")
 
     visualize = False
     if visualize:
