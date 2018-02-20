@@ -78,12 +78,13 @@ class generator:
       while True: #continuously execute
         while not self.execute: continue
 
+        self.run0 = True
         if self.threadnum == 0: #Thread0
             while not self.ready0: continue
             self.ready0 = False
             self.current_edgearray = self.suppressed_edgearray0.copy()
             self.current_orientationarray = self.orientationarray0.copy()
-            self.run0 = True
+            #self.run0 = True
             self.frame = self.frame + 1
             self.threadnum = 0
 
