@@ -40,6 +40,8 @@ class generator:
         self.edgeGenerator0 = cv2.ximgproc.createStructuredEdgeDetection(model = modelfile)
         print("Loading model1...")
         self.edgeGenerator1 = cv2.ximgproc.createStructuredEdgeDetection(model = modelfile)
+        print("Loading model2...")
+        self.edgeGenerator2 = cv2.ximgproc.createStructuredEdgeDetection(model = modelfile)
 
         self.frame = 0 #Frame count
 
@@ -47,6 +49,9 @@ class generator:
         self.run1 = True
         self.ready0 = False #flags indicating state of generate threads' data
         self.ready1 = False
+
+        self.run2 = True #third thread
+        self.ready2 = False
 
         Thread0 = threading.Thread(target=self._generate0)
         Thread0.daemon = True
@@ -60,6 +65,12 @@ class generator:
         print("initializing map1...")
         while not self.ready1: continue #wait for second thread to create map
 
+        Thread2 = threading.Thread(target=self._generate2)
+        Thread2.daemon = True
+        Thread2.start()
+        print("initializing map2...")
+        while not self.ready2: continue #wait for third thread to create map
+
         self.execute = False #flags controlling this thread
         self.threadnum = 0
 
@@ -67,7 +78,7 @@ class generator:
       while True: #continuously execute
         while not self.execute: continue
 
-        if self.threadnum == 0: #Thread1
+        if self.threadnum == 0: #Thread0
             while not self.ready0: continue
             self.ready0 = False
             self.current_edgearray = self.suppressed_edgearray0.copy()
@@ -76,12 +87,21 @@ class generator:
             self.frame = self.frame + 1
             self.threadnum = 1
 
-        elif self.threadnum == 1: #Thread0
+        elif self.threadnum == 1: #Thread1
             while not self.ready1: continue
             self.ready1 = False
             self.current_edgearray = self.suppressed_edgearray1.copy()
             self.current_orientationarray = self.orientationarray1.copy()
             self.run1 = True
+            self.frame = self.frame + 1
+            self.threadnum = 2
+
+        elif self.threadnum == 2: #Thread2
+            while not self.ready2: continue
+            self.ready2 = False
+            self.current_edgearray = self.suppressed_edgearray2.copy()
+            self.current_orientationarray = self.orientationarray2.copy()
+            self.run2 = True
             self.frame = self.frame + 1
             self.threadnum = 0
 
@@ -110,3 +130,15 @@ class generator:
         self.orientationarray1 = self.edgeGenerator1.computeOrientation(edgearray1)
         self.suppressed_edgearray1 = self.edgeGenerator1.edgesNms(edgearray1, self.orientationarray1)
         self.ready1 = True
+
+    def _generate2(self):
+      while True:
+        while not self.run2: continue
+        while self.Reader.framenum < self.frame or self.run0 or self.run1: continue #Don't grab frame till ready
+        currentframe = self.Reader.currentframe.copy()
+        self.Reader.execute = True
+        self.run2 = False
+        edgearray2 = self.edgeGenerator2.detectEdges(currentframe)
+        self.orientationarray2 = self.edgeGenerator2.computeOrientation(edgearray2)
+        self.suppressed_edgearray2 = self.edgeGenerator2.edgesNms(edgearray2, self.orientationarray2)
+        self.ready2 = True
