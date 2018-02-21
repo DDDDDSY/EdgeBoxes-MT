@@ -13,7 +13,6 @@ video = reader(file)
 videoThread = threading.Thread(target=video.read)
 videoThread.daemon = True
 videoThread.start()
-video.execute = True #starts with a frame ready
 
 Generator = generator(modelfile, video)
 generatorThread = threading.Thread(target=Generator.generate)
@@ -55,7 +54,7 @@ try:
     visualize = False
     if visualize:
       #frame = draw_boxes(boxes, Generator.current_edgearray)
-      cv2.imshow('image', Generator.current_edgearray)
+      cv2.imshow('image', current_edgearray)
       cv2.waitKey(10)
 
     frames = frames + 1

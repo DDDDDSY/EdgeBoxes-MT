@@ -20,7 +20,8 @@ class reader:
     def read(self):
       while True:
         while not self.execute: continue #wait for main thread
-        self.currentframe = self.frame
+        self.execute = False
+        self.currentframe = self.frame.copy()
         self.framenum = self.framenum + 1
         _, self.frame = self.video_capture.read()
         if self.frame is None:
@@ -28,7 +29,6 @@ class reader:
 
         self.frame = self.frame.astype(np.float32) #Change type to be compatible with edgeDetect
         self.frame = np.divide(self.frame, 255.0) #Normalize to [0,1]
-        self.execute = False
 
 class generator:
 
@@ -42,16 +42,13 @@ class generator:
         self.queue0 = Queue()
         self.queue1 = Queue()
         
-        
         ### INITIALIZE THREADS ###
         self.Thread0 = Process(target=self._generate,
                        args=(self.edgeGenerator, self.Reader.currentframe, self.queue0,),
                         daemon = True)
         print("Thread0 Initializing")
         self.Thread0.start()
-        self.Reader.execute = self.queue0.get() 
-        self.current_edgearray0 = self.queue0.get()
-        self.current_orientationarray0 = self.queue0.get()
+        self.Reader.execute = True
         self.Thread0.join(5) #exit if hangs for more than 5 seconds
         
         self.Thread1 = Process(target=self._generate,
@@ -59,16 +56,14 @@ class generator:
                        daemon = True)
         print("Thread1 Initializing")
         self.Thread1.start()
-        self.Reader.execute = self.queue1.get() 
-        self.current_edgearray1 = self.queue1.get()
-        self.current_orientationarray1 = self.queue1.get()
+        self.Reader.execute = True
         self.Thread1.join(5) #exit if hangs for more than 5 seconds
         ### END INITIALIZATION
         
-        
-        self.frame = 1 #Frame count
+        self.ready = False
+        self.framenum = 2 #Frame count starts at 2 due to earlier inits
         self.execute = False #flags controlling this thread
-        self.threadnum = 1 #Start on thread 1 since thread 0 has data
+        self.threadnum = 0
 
     def generate(self):
       while True: #continuously execute
@@ -76,41 +71,39 @@ class generator:
 
         if self.threadnum == 0: #Thread 0
         
-            self.current_edgearray = self.current_edgearray0
-            self.current_orientationarray = self.current_orientationarray0
+            self.current_edgearray = self.queue0.get()
+            self.current_orientationarray = self.queue0.get()
             self.execute = False
+
+            self.framenum = self.framenum + 1
             
-            self.Thread0.join(5) #exit if hangs for more than 5 seconds
+            while self.framenum > self.Reader.framenum: continue
             self.Thread0 = Process(target=self._generate,
                            args=(self.edgeGenerator, self.Reader.currentframe, self.queue0,),
                            daemon = True)
-            print("Thread0 Start")
             self.Thread0.start()
-            self.Reader.execute = self.queue0.get()
-            self.current_edgearray0 = self.queue0.get()
-            self.current_orientationarray0 = self.queue0.get()
+            self.Reader.execute = True
             self.threadnum = 1
-
+            
         elif self.threadnum == 1: #Thread 1
         
-            self.current_edgearray = self.current_edgearray1
-            self.current_orientationarray = self.current_orientationarray1
+            self.current_edgearray = self.queue1.get()
+            self.current_orientationarray = self.queue1.get()
             self.execute = False
+
+            self.framenum = self.framenum + 1
             
-            self.Thread1.join(5) #exit if hangs for more than 5 seconds
+            while self.framenum > self.Reader.framenum: continue
             self.Thread1 = Process(target=self._generate,
                            args=(self.edgeGenerator, self.Reader.currentframe, self.queue1,),
                            daemon = True)
-            print("Thread1 Start")
             self.Thread1.start()
-            self.Reader.execute = self.queue1.get()
-            self.current_edgearray1 = self.queue1.get()
-            self.current_orientationarray1 = self.queue1.get()
+            self.Reader.execute = True
             self.threadnum = 0
 
+         
     def _generate(self, edgeGenerator, currentframe, q):
         edgearray = edgeGenerator.detectEdges(currentframe)
-        q.put(True) #Execute next frame read
         orientationarray = edgeGenerator.computeOrientation(edgearray)
         suppressed_edgearray = edgeGenerator.edgesNms(edgearray, orientationarray)
         q.put(suppressed_edgearray)
