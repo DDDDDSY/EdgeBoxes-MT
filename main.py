@@ -20,7 +20,7 @@ generatorThread = threading.Thread(target=Generator.generate)
 generatorThread.daemon = True
 generatorThread.start() #starts with first maps ready
 
-boxGenerator = cv2.ximgproc.createEdgeBoxes(maxBoxes = 1000,
+boxGenerator = cv2.ximgproc.createEdgeBoxes(maxBoxes = 100,
                                             alpha = 0.65,
                                             beta = 0.75,
                                             minScore = 0.03)
@@ -66,8 +66,9 @@ try:
 
     visualize = True
     if visualize:
-      #frame = draw_boxes(boxes, Generator.current_edgearray)
-      cv2.imshow('image', Generator.current_edgearray)
+      frame = draw_boxes(boxes, Generator.current_edgearray)
+      cv2.imshow('image', frame)
+      cv2.imshow('edgemap', Generator.current_edgearray)
       cv2.waitKey(10)
 
     frames = frames + 1
