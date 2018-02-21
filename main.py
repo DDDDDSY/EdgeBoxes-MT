@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 import threading
+from multiprocessing import Process, Queue
 import time
 
 from classes import reader, generator
@@ -24,6 +25,12 @@ boxGenerator = cv2.ximgproc.createEdgeBoxes(maxBoxes = 1000,
                                             beta = 0.75,
                                             minScore = 0.03)
 
+def boundingBoxes(boxgenerator, edgearray, orientationarray, q):
+    boxes = boxgenerator.getBoundingBoxes(edgearray, orientationarray)
+    q.put(boxes)
+
+queue = Queue() #queue for boxes
+
 frames = 0
 total_fps = 0
 Generator.execute = True #Start next execution
@@ -39,17 +46,25 @@ try:
     Generator.execute = True #Start next execution
     
     bbeginning = time.time()
-    boxes = boxGenerator.getBoundingBoxes(Generator.current_edgearray,
-                                          Generator.current_orientationarray)
-    #box[0] x1, box[1] x2, box[2] width, box[3] height
-    
+
+    ### predict boxes thread###
+    boxesThread = Process(target=boundingBoxes,
+                        args=(boxGenerator,
+                              Generator.current_edgearray,
+                              Generator.current_orientationarray,
+                              queue,),
+                        daemon = True)
+    boxesThread.start()
+    boxes = queue.get() #box[0] x1, box[1] x2, box[2] width, box[3] height
+    boxesThread.join()
+
     print("BEx: ", round(time.time()-bbeginning, 3))
     print("BBs: ", len(boxes))
 
     fps = 1/(time.time()-beginning)
     print("FPS: ", fps, "\n")
 
-    visualize = False
+    visualize = True
     if visualize:
       #frame = draw_boxes(boxes, Generator.current_edgearray)
       cv2.imshow('image', Generator.current_edgearray)
