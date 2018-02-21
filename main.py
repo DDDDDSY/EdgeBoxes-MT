@@ -36,13 +36,11 @@ try:
     if Generator.execute: print("waiting...") # Wait for top thread to be ready
     while Generator.execute: continue
     
-    current_edgearray = Generator.current_edgearray.copy() #Save values so they don't change after execute
-    current_orientationarray = Generator.current_orientationarray.copy()
     Generator.execute = True #Start next execution
     
     bbeginning = time.time()
-    boxes = boxGenerator.getBoundingBoxes(current_edgearray,
-                                          current_orientationarray)
+    boxes = boxGenerator.getBoundingBoxes(Generator.current_edgearray,
+                                          Generator.current_orientationarray)
     #box[0] x1, box[1] x2, box[2] width, box[3] height
     
     print("BEx: ", round(time.time()-bbeginning, 3))
@@ -54,7 +52,7 @@ try:
     visualize = False
     if visualize:
       #frame = draw_boxes(boxes, Generator.current_edgearray)
-      cv2.imshow('image', current_edgearray)
+      cv2.imshow('image', Generator.current_edgearray)
       cv2.waitKey(10)
 
     frames = frames + 1
