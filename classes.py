@@ -41,6 +41,7 @@ class generator:
         self.edgeGenerator = cv2.ximgproc.createStructuredEdgeDetection(model = modelfile)
         self.queue0 = Queue()
         self.queue1 = Queue()
+        self.queue2 = Queue()
         
         ### INITIALIZE THREADS ###
         self.Thread0 = Process(target=self._generate,
@@ -58,10 +59,18 @@ class generator:
         self.Thread1.start()
         self.Reader.execute = True
         self.Thread1.join(5) #exit if hangs for more than 5 seconds
+        
+        self.Thread2 = Process(target=self._generate,
+                       args=(self.edgeGenerator, self.Reader.currentframe, self.queue2,),
+                       daemon = True)
+        print("Thread2 Initializing")
+        self.Thread2.start()
+        self.Reader.execute = True
+        self.Thread2.join(5) #exit if hangs for more than 5 seconds
         ### END INITIALIZATION
         
         self.ready = False
-        self.framenum = 2 #Frame count starts at 2 due to earlier inits
+        self.framenum = 3 #Frame count starts at 2 due to earlier inits
         self.execute = False #flags controlling this thread
         self.threadnum = 0
 
@@ -98,6 +107,22 @@ class generator:
                            args=(self.edgeGenerator, self.Reader.currentframe, self.queue1,),
                            daemon = True)
             self.Thread1.start()
+            self.Reader.execute = True
+            self.threadnum = 2
+            
+        elif self.threadnum == 2: #Thread 2
+        
+            self.current_edgearray = self.queue2.get()
+            self.current_orientationarray = self.queue2.get()
+            self.execute = False
+
+            self.framenum = self.framenum + 1
+            
+            while self.framenum > self.Reader.framenum: continue
+            self.Thread2 = Process(target=self._generate,
+                           args=(self.edgeGenerator, self.Reader.currentframe, self.queue2,),
+                           daemon = True)
+            self.Thread2.start()
             self.Reader.execute = True
             self.threadnum = 0
 
