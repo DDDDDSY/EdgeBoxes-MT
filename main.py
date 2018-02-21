@@ -27,25 +27,27 @@ boxGenerator = cv2.ximgproc.createEdgeBoxes(maxBoxes = 1000,
 
 frames = 0
 total_fps = 0
-Generator.execute = True
+Generator.execute = True #Start next execution
 
 try:
   while True:
 
     beginning = time.time() #For FPS calculations
-
+    
     if Generator.execute: print("waiting...") # Wait for top thread to be ready
     while Generator.execute: continue
     
-    beginning = time.time()
-    boxes = boxGenerator.getBoundingBoxes(Generator.current_edgearray,
-                                          Generator.current_orientationarray)
+    current_edgearray = Generator.current_edgearray.copy() #Save values so they don't change after execute
+    current_orientationarray = Generator.current_orientationarray.copy()
+    Generator.execute = True #Start next execution
+    
+    bbeginning = time.time()
+    boxes = boxGenerator.getBoundingBoxes(current_edgearray,
+                                          current_orientationarray)
     #box[0] x1, box[1] x2, box[2] width, box[3] height
     
-    print("BEx: ", round(time.time()-beginning, 3))
+    print("BEx: ", round(time.time()-bbeginning, 3))
     print("BBs: ", len(boxes))
-    
-    Generator.execute = True #Start next execution
 
     fps = 1/(time.time()-beginning)
     print("FPS: ", fps, "\n")
