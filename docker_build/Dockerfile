@@ -9,4 +9,4 @@ Expose 6002
 
 WORKDIR "/RPi-Edge"
 
-CMD ["python", "/RPi-Edge/main.py"]
+CMD ["python", "/RPi-Edge/main.py", "6", "2", "n"]
