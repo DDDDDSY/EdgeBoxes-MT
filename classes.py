@@ -51,6 +51,7 @@ class generator:
         ### INITIALIZE THREADS ###
         self.thread = list()
         for x in range(0, num_threads):
+            if self.framenum >= self.Reader.framenum: print("gen waiting...")
             while self.framenum >= self.Reader.framenum: continue #wait for frame
             self.thread.append(Process(target=self._generate,
                                args=(self.edgeGenerator,
@@ -75,6 +76,7 @@ class generator:
         self.current_orientationarray = self.queue[self.threadnum].get()
         self.execute = False
         
+        if self.framenum >= self.Reader.framenum: print("gen waiting...")
         while self.framenum >= self.Reader.framenum: continue #Wait for video reader
         
         self.thread[self.threadnum] = Process(target=self._generate,
@@ -128,6 +130,7 @@ class predictor:
         ### INITIALIZE THREADS ###
         self.thread = list()
         for x in range(0, self.num_threads):
+            if self.generator.execute: print("pred waiting...")
             while self.generator.execute: continue #wait for edgemap
             self.thread.append(Process(target=self._predict,
                                args=(self.boxGenerator,
@@ -149,6 +152,7 @@ class predictor:
         
         self.boxes.put(self.queue[self.threadnum].get())
         
+        if self.generator.execute: print("pred waiting...")
         while self.generator.execute: continue #Wait for generator
         self.thread[self.threadnum] = Process(target=self._predict,
                                               args=(self.boxGenerator,
