@@ -108,12 +108,12 @@ class generator:
 ### Class to generate boxes in a multithreaded environment. Transparent to main ###
 class predictor:
 
-    def __init__(self, generator):
+    def __init__(self, generator, ratio):
 
         self.generator = generator
         self.generator.execute = True #prepare current_edge*
     
-        self.num_threads = math.floor(self.generator.num_threads/2) #2 gen. threads per pred. thread
+        self.num_threads = math.floor(self.generator.num_threads/ratio) #ratio gen. threads per pred. thread
         
         self.framenum = 0 #keep track of how many frames have been processed
         
