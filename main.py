@@ -10,11 +10,13 @@ from functions import draw_boxes
 file = "video.mp4"
 modelfile = "model.yml.gz" #StructuredEdgeDetection model (generates edgemap)
 
+###video reading thread setup###
 video = reader(file)
 videoThread = threading.Thread(target=video.read)
 videoThread.daemon = True
 videoThread.start()
 
+###Gen and Pred threads setup###
 num_threads = 6
 Generator = generator(modelfile, video, num_threads)
 generatorThread = threading.Thread(target=Generator.generate)
@@ -25,6 +27,8 @@ Predictor = predictor(Generator)
 predictorThread = threading.Thread(target = Predictor.predict)
 predictorThread.daemon = True
 predictorThread.start()
+
+###MAIN###
 
 frames = 0
 total_fps = 0
