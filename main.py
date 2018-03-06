@@ -64,7 +64,7 @@ try:
     fps = 1/(time.time()-beginning)
     print("FPS: ", fps, "\n")
 
-    visualize = True
+    visualize = False
     if visualize:
       frame = draw_boxes(boxes, Generator.current_edgearray)
       cv2.imshow('image', frame)
