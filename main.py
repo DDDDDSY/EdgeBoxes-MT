@@ -15,7 +15,8 @@ videoThread = threading.Thread(target=video.read)
 videoThread.daemon = True
 videoThread.start()
 
-Generator = generator(modelfile, video)
+num_threads = 3
+Generator = generator(modelfile, video, num_threads)
 generatorThread = threading.Thread(target=Generator.generate)
 generatorThread.daemon = True
 generatorThread.start() #starts with first maps ready
