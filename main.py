@@ -10,8 +10,8 @@ from functions import draw_boxes
 ### CLI arguments parsing ###
 import argparse
 parser = argparse.ArgumentParser()
-parser.add_argument("num_threads", help="Specify number of generation threads")
-parser.add_argument("ratio", help="Specify number of gen threads per pred thread, ie. 2")
+parser.add_argument("gen_threads", help="Specify number of generation threads")
+parser.add_argument("pred_threads", help="Specify number of prediction threads")
 parser.add_argument("visualize", help="Display video? y/n")
 args = parser.parse_args()
 
@@ -25,12 +25,12 @@ videoThread.daemon = True
 videoThread.start()
 
 ### Gen and Pred threads setup ###
-Generator = generator(modelfile, video, int(args.num_threads))
+Generator = generator(modelfile, video, int(args.gen_threads))
 generatorThread = threading.Thread(target=Generator.generate)
 generatorThread.daemon = True
 generatorThread.start() #starts with first maps ready
 
-Predictor = predictor(Generator, int(args.ratio))
+Predictor = predictor(Generator, int(args.pred_threads))
 predictorThread = threading.Thread(target = Predictor.predict)
 predictorThread.daemon = True
 predictorThread.start()
