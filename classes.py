@@ -43,11 +43,13 @@ class generator:
         print("Loading model...")
         self.edgeGenerator = cv2.ximgproc.createStructuredEdgeDetection(model = modelfile)
 
-        #Create a queue for each thread
+        #Create an output and input queue for each thread
         self.queue = list()
+        self.queuein = list()
         for x in range(0, num_threads):
-	        self.queue.append(Queue())
-
+            self.queue.append(Queue())
+            self.queuein.append(Queue())
+            
         ### INITIALIZE THREADS ###
         self.thread = list()
         for x in range(0, num_threads):
@@ -55,11 +57,12 @@ class generator:
             while self.framenum >= self.Reader.framenum: continue #wait for frame
             self.thread.append(Process(target=self._generate,
                                args=(self.edgeGenerator,
-                                     self.Reader.currentframe,
+                                     self.queuein[x],
                                      self.queue[x],),
                                daemon = True))
             print("Generation Thread", x, " Initializing")
             self.thread[x].start()
+            self.queuein[x].put(self.Reader.currentframe)
             self.framenum = self.framenum + 1
             self.Reader.execute = True
         
@@ -79,18 +82,15 @@ class generator:
         if self.framenum >= self.Reader.framenum: print("gen waiting...")
         while self.framenum >= self.Reader.framenum: continue #Wait for video reader
         
-        self.thread[self.threadnum] = Process(target=self._generate,
-                                              args=(self.edgeGenerator,
-                                                    self.Reader.currentframe,
-                                                    self.queue[self.threadnum],),
-                                              daemon = True)
-        self.thread[self.threadnum].start()
+        self.queuein[self.threadnum].put(self.Reader.currentframe)
         self.framenum = self.framenum + 1
         self.Reader.execute = True
         self.threadnum = self.next_thread()
 
          
-    def _generate(self, edgeGenerator, currentframe, q):
+    def _generate(self, edgeGenerator, qin, q):
+      while True:
+        currentframe = qin.get()
         edgearray = edgeGenerator.detectEdges(currentframe)
         orientationarray = edgeGenerator.computeOrientation(edgearray)
         suppressed_edgearray = edgeGenerator.edgesNms(edgearray, orientationarray)
@@ -124,8 +124,10 @@ class predictor:
 
         #Create a queue for each thread
         self.queue = list()
+        self.queuein = list()
         for x in range(0, self.num_threads):
             self.queue.append(Queue())
+            self.queuein.append(Queue())
 
         ### INITIALIZE THREADS ###
         self.thread = list()
@@ -134,12 +136,13 @@ class predictor:
             while self.generator.execute: continue #wait for edgemap
             self.thread.append(Process(target=self._predict,
                                args=(self.boxGenerator,
-                                     self.generator.current_edgearray,
-                                     self.generator.current_orientationarray,
+                                     self.queuein[x],
                                      self.queue[x],),
                                daemon = True))
             print("Prediction Thread", x, "Initializing")
             self.thread[x].start()
+            self.queuein[x].put(self.generator.current_edgearray)
+            self.queuein[x].put(self.generator.current_orientationarray)
             self.generator.execute = True
             self.framenum = self.framenum + 1
         
@@ -154,19 +157,18 @@ class predictor:
         
         if self.generator.execute: print("pred waiting...")
         while self.generator.execute: continue #Wait for generator
-        self.thread[self.threadnum] = Process(target=self._predict,
-                                              args=(self.boxGenerator,
-                                                    self.generator.current_edgearray,
-                                                    self.generator.current_orientationarray,
-                                                    self.queue[self.threadnum],),
-                                              daemon = True)
-        self.thread[self.threadnum].start()
+        
+        self.queuein[self.threadnum].put(self.generator.current_edgearray)
+        self.queuein[self.threadnum].put(self.generator.current_orientationarray)
         self.generator.execute = True
         self.framenum = self.framenum + 1
         self.threadnum = self.next_thread()
 
         
-    def _predict(self, boxgenerator, edgearray, orientationarray, q):
+    def _predict(self, boxgenerator, qin, q):
+      while True:
+        edgearray = qin.get()
+        orientationarray = qin.get()
         boxes = boxgenerator.getBoundingBoxes(edgearray, orientationarray)
         q.put(boxes)
 
