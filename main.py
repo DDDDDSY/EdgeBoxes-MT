@@ -61,7 +61,7 @@ try:
     frames = frames + 1
     total_fps = total_fps + fps
 
-    if video.frame is None:
+    if boxes is None:
         print("End of Video File!")
         exit(frames/(time.time()-bbeginning))
 

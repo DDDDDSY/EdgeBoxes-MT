@@ -26,6 +26,7 @@ class reader:
         self.framenum = self.framenum + 1
         _, self.frame = self.video_capture.read()
         if self.frame is None:
+            self.currentframe = None
             exit("End of video file!")
 
         self.frame = self.frame.astype(np.float32) #Change type to be compatible with edgeDetect
@@ -81,6 +82,12 @@ class generator:
         
         if self.framenum >= self.Reader.framenum: print("gen waiting...")
         while self.framenum >= self.Reader.framenum: continue #Wait for video reader
+        
+        if self.Reader.currentframe is None: #Exit when video is over
+            self.current_edgearray = None
+            self.current_orientationarray = None
+            print("Generate done...")
+            exit()
         
         self.queuein[self.threadnum].put(self.Reader.currentframe)
         self.framenum = self.framenum + 1
@@ -157,6 +164,11 @@ class predictor:
         
         if self.generator.execute: print("pred waiting...")
         while self.generator.execute: continue #Wait for generator
+        
+        if self.generator.current_edgearray is None: #exit once video is done
+            self.boxes.put(None)
+            print("Prediction done...")
+            exit()
         
         self.queuein[self.threadnum].put(self.generator.current_edgearray)
         self.queuein[self.threadnum].put(self.generator.current_orientationarray)
