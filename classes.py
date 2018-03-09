@@ -81,7 +81,7 @@ class generator:
         self.execute = False
         
         if self.framenum >= self.Reader.framenum: print("gen waiting...")
-        while self.framenum >= self.Reader.framenum: continue #Wait for video reader
+        while self.framenum >= self.Reader.framenum and self.Reader.currentframe is not None: continue #Wait for video reader
         
         if self.Reader.currentframe is None: #Exit when video is over
             self.current_edgearray = None
@@ -164,7 +164,7 @@ class predictor:
         self.boxes.put(self.queue[self.threadnum].get()) #edgemap
         
         if self.generator.execute: print("pred waiting...")
-        while self.generator.execute: continue #Wait for generator
+        while self.generator.execute and self.generator.current_edgearray is not None : continue #Wait for generator
         
         if self.generator.current_edgearray is None: #exit once video is done
             self.boxes.put(None) #boxes
