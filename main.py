@@ -46,17 +46,22 @@ try:
   while True:
 
     beginning = time.time() #For FPS calculations
-    
+
     boxes = Predictor.boxes.get()
     edgearray = Predictor.boxes.get()
 
     if boxes is None:
         print("End of Video File!")
+        with open("fps.log", "a") as myfile: #Write fps to file for logging
+            myfile.write(str(args.gen_threads)+
+                         " "+str(args.pred_threads)+
+                         " "+str(frames/(time.time()-bbeginning))+
+                         "\n")
         exit(frames/(time.time()-bbeginning))
-    
+
     fps = 1/(time.time()-beginning)
-    print("FPS: ", fps, "\n")
-    
+    print("FPS: ", int(fps))
+
     if args.visualize == 'y':
       frame = draw_boxes(boxes, edgearray)
       cv2.imshow('image', frame)
