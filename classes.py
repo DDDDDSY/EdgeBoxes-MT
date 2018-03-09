@@ -160,13 +160,15 @@ class predictor:
     def predict(self):
       while True:
         
-        self.boxes.put(self.queue[self.threadnum].get())
+        self.boxes.put(self.queue[self.threadnum].get()) #boxes
+        self.boxes.put(self.queue[self.threadnum].get()) #edgemap
         
         if self.generator.execute: print("pred waiting...")
         while self.generator.execute: continue #Wait for generator
         
         if self.generator.current_edgearray is None: #exit once video is done
-            self.boxes.put(None)
+            self.boxes.put(None) #boxes
+            self.boxes.put(None) #edgemap
             print("Prediction done...")
             exit()
         
@@ -183,7 +185,7 @@ class predictor:
         orientationarray = qin.get()
         boxes = boxgenerator.getBoundingBoxes(edgearray, orientationarray)
         q.put(boxes)
-
+        q.put(edgearray)
         
     def next_thread(self):
         if self.threadnum == self.num_threads - 1:

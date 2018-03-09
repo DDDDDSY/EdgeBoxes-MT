@@ -48,22 +48,23 @@ try:
     beginning = time.time() #For FPS calculations
     
     boxes = Predictor.boxes.get()
-
-    fps = 1/(time.time()-beginning)
-    print("FPS: ", fps, "\n")
-
-    if args.visualize == 'y':
-      frame = draw_boxes(boxes, Generator.current_edgearray)
-      cv2.imshow('image', frame)
-      cv2.imshow('edgemap', Generator.current_edgearray)
-      cv2.waitKey(10)
-
-    frames = frames + 1
-    total_fps = total_fps + fps
+    edgearray = Predictor.boxes.get()
 
     if boxes is None:
         print("End of Video File!")
         exit(frames/(time.time()-bbeginning))
+    
+    fps = 1/(time.time()-beginning)
+    print("FPS: ", fps, "\n")
+    
+    if args.visualize == 'y':
+      frame = draw_boxes(boxes, edgearray)
+      cv2.imshow('image', frame)
+      cv2.imshow('edgemap', edgearray)
+      cv2.waitKey(10)
+
+    frames = frames + 1
+    total_fps = total_fps + fps
 
 except KeyboardInterrupt:
     exit(frames/(time.time()-bbeginning))
