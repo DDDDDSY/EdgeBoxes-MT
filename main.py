@@ -55,9 +55,9 @@ try:
         with open("fps.log", "a") as myfile: #Write fps to file for logging
             myfile.write(str(args.gen_threads)+
                          " "+str(args.pred_threads)+
-                         " "+str(frames/(time.time()-bbeginning))+
+                         " "+str(256/(time.time()-bbeginning))+
                          "\n")
-        exit(frames/(time.time()-bbeginning))
+        exit(256/(time.time()-bbeginning))
 
     fps = 1/(time.time()-beginning)
     print("FPS: ", int(fps))
@@ -72,4 +72,4 @@ try:
     total_fps = total_fps + fps
 
 except KeyboardInterrupt:
-    exit(frames/(time.time()-bbeginning))
+    exit(256/(time.time()-bbeginning))
