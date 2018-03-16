@@ -18,4 +18,9 @@ do
 
   PRED=$((PRED+1))
 
+  if [ "$PRED" -gt "4" ] #Increase in bigger increments after 4 threads
+  then
+    PRED=$((PRED+1))
+  fi
+
 done
