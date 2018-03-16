@@ -9,5 +9,4 @@ Expose 6002
 
 WORKDIR "/RPi-Edge"
 
-#Automatically launch with 6 Gen threads and a Pred thread for every 2 Gen threads
-CMD ["bash", "/RPi-Edge/fps_measure.sh", "4"]
+CMD ["/bin/bash"]
