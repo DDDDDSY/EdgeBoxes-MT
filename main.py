@@ -15,7 +15,7 @@ parser.add_argument("pred_threads", help="Specify number of prediction threads")
 parser.add_argument("visualize", help="Display video? y/n")
 args = parser.parse_args()
 
-file = "video.mp4"
+file = "input.mp4"
 modelfile = "model.yml.gz" #StructuredEdgeDetection model (generates edgemap)
 
 ### video reading thread setup ###
