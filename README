@@ -1,1 +1,15 @@
-Video and Region Proposal streaming code for IoTPark
+Video and Region Proposal streaming code for IoTPark. 
+
+Utilizes opencv_contrib plugin EdgeBoxes. Installation can be completed using scripts at tools/install_openCV.sh. Alternatively, a docker container can be built with all dependencies. Instructions below:
+  tools/install_openCV.sh
+   *follow prompts
+OR:
+  docker_build/build_container.sh
+   *Docker must be installed prior to running this script
+  docker run -it edgeboxes
+
+Usage:
+  python3 main.py [gen_threads] [pred_threads] [visualize]
+   *gen_threads and pred_threads are integers. visualize is y/n
+
+gen_threads refers to how many threads are used for generating edge maps. pred_threads refers to how many threads are used for predicting bounding boxes from edge maps. A good ratio is 2:1, or any multiple of said ratio.
