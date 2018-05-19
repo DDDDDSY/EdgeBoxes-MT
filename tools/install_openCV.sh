@@ -40,7 +40,9 @@ cmake -D CMAKE_BUILD_TYPE=RELEASE \
       -D INSTALL_PYTHON_EXAMPLES=ON \
       -D OPENCV_EXTRA_MODULES_PATH=../../opencv_contrib-3.4.0/modules \
       -D WITH_FFMPEG=1 \
-      -D BUILD_EXAMPLES=ON  ..
+      -D BUILD_EXAMPLES=ON \
+      -D PYTHON_INCLUDE_DIR=$(python -c "from distutils.sysconfig import get_python_inc; print(get_python_inc())")  \
+      -D PYTHON_LIBRARY=$(python -c "import distutils.sysconfig as sysconfig; print(sysconfig.get_config_var('LIBDIR'))")  ..
 
 echo "Does the cmake output look good? y/n"
 read input
