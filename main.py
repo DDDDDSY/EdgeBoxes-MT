@@ -50,6 +50,7 @@ try:
 
     boxes = Predictor.boxes.get()
     edgearray = Predictor.boxes.get()
+    video_frame = Predictor.boxes.get()
 
     if boxes is None:
         exit()
@@ -67,6 +68,7 @@ try:
       frame = draw_boxes(boxes, edgearray)
       cv2.imshow('image', frame)
       cv2.imshow('edgemap', edgearray)
+      cv2.imshow('original', video_frame)
       cv2.waitKey(10)
 
     frames = frames + 1

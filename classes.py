@@ -104,6 +104,7 @@ class generator:
 
         self.current_edgearray = self.queue[self.threadnum].get()
         self.current_orientationarray = self.queue[self.threadnum].get()
+        self.current_frame = self.queue[self.threadnum].get()
         self.execute = False
         
         if self.framenum >= self.Reader.framenum: print("gen waiting...")
@@ -112,6 +113,7 @@ class generator:
         if self.Reader.currentframe is None: #Exit when video is over
             self.current_edgearray = None
             self.current_orientationarray = None
+            self.current_frame = None
             print("Generate done...")
             exit()
         
@@ -129,6 +131,7 @@ class generator:
         suppressed_edgearray = edgeGenerator.edgesNms(edgearray, orientationarray)
         q.put(suppressed_edgearray)
         q.put(orientationarray)
+        q.put(currentframe)
         
     def next_thread(self):
         if self.threadnum == self.num_threads - 1:
@@ -176,6 +179,7 @@ class predictor:
             self.thread[x].start()
             self.queuein[x].put(self.generator.current_edgearray)
             self.queuein[x].put(self.generator.current_orientationarray)
+            self.queuein[x].put(self.generator.current_frame)
             self.generator.execute = True
             self.framenum = self.framenum + 1
         
@@ -186,8 +190,10 @@ class predictor:
     def predict(self):
       while True:
         
+        #Put stuff in queue for main thread to access
         self.boxes.put(self.queue[self.threadnum].get()) #boxes
         self.boxes.put(self.queue[self.threadnum].get()) #edgemap
+        self.boxes.put(self.queue[self.threadnum].get()) #frame
         
         if self.generator.execute: print("pred waiting...")
         while self.generator.execute and self.generator.current_edgearray is not None : continue #Wait for generator
@@ -195,11 +201,13 @@ class predictor:
         if self.generator.current_edgearray is None: #exit once video is done
             self.boxes.put(None) #boxes
             self.boxes.put(None) #edgemap
+            self.boxes.put(None) #frame
             print("Prediction done...")
             exit()
         
         self.queuein[self.threadnum].put(self.generator.current_edgearray)
         self.queuein[self.threadnum].put(self.generator.current_orientationarray)
+        self.queuein[self.threadnum].put(self.generator.current_frame)
         self.generator.execute = True
         self.framenum = self.framenum + 1
         self.threadnum = self.next_thread()
@@ -209,9 +217,11 @@ class predictor:
       while True:
         edgearray = qin.get()
         orientationarray = qin.get()
+        frame = qin.get()
         boxes = boxgenerator.getBoundingBoxes(edgearray, orientationarray)
         q.put(boxes)
         q.put(edgearray)
+        q.put(frame)
         
     def next_thread(self):
         if self.threadnum == self.num_threads - 1:
