@@ -4,7 +4,8 @@ import threading
 from multiprocessing import Process, Queue
 import time
 
-from classes import reader, generator, predictor
+from classes import readerNetwork, generator, predictor
+reader = readerNetwork
 from functions import draw_boxes
 
 ### CLI arguments parsing ###
@@ -15,11 +16,11 @@ parser.add_argument("pred_threads", help="Specify number of prediction threads")
 parser.add_argument("visualize", help="Display video? y/n")
 args = parser.parse_args()
 
-file = "input.mp4"
+#file = "input.mp4"
 modelfile = "model.yml.gz" #StructuredEdgeDetection model (generates edgemap)
 
 ### video reading thread setup ###
-video = reader(file)
+video = reader(9001)
 videoThread = threading.Thread(target=video.read)
 videoThread.daemon = True
 videoThread.start()
@@ -51,13 +52,13 @@ try:
     edgearray = Predictor.boxes.get()
 
     if boxes is None:
-        print("End of Video File!")
-        with open("fps.log", "a") as myfile: #Write fps to file for logging
-            myfile.write(str(args.gen_threads)+
-                         " "+str(args.pred_threads)+
-                         " "+str(256/(time.time()-bbeginning))+
-                         "\n")
-        exit(256/(time.time()-bbeginning))
+        exit()
+        #with open("fps.log", "a") as myfile: #Write fps to file for logging
+        #    myfile.write(str(args.gen_threads)+
+        #                 " "+str(args.pred_threads)+
+        #                 " "+str(256/(time.time()-bbeginning))+
+        #                 "\n")
+        #exit(256/(time.time()-bbeginning))
 
     fps = 1/(time.time()-beginning)
     print("FPS: ", int(fps))
@@ -72,4 +73,4 @@ try:
     total_fps = total_fps + fps
 
 except KeyboardInterrupt:
-    exit(256/(time.time()-bbeginning))
+    exit()

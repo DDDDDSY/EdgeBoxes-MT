@@ -3,6 +3,32 @@ import numpy as np
 from multiprocessing import Process, Queue
 import math
 
+#Pull feed from udp stream
+class readerNetwork:
+
+    def __init__(self, port):
+
+        #Assumes video stream is already started
+        self.video_capture = cv2.VideoCapture("udp://127.0.0.1:"+str(port))
+        self.execute = False
+
+        self.framenum = 0
+
+    def read(self):
+      while True:
+
+        _, self.frame = self.video_capture.read()
+        self.framenum = self.framenum + 1
+
+        if self.frame is None:
+            self.currentframe = None
+            exit("End of video stream!")
+
+        self.frame = self.frame.astype(np.float32) #Change type to be compatible with edgeDetect
+        self.frame = np.divide(self.frame, 255.0) #Normalize to [0,1]
+        self.currentframe = self.frame.copy()
+
+
 class reader:
 
     def __init__(self, filename):
