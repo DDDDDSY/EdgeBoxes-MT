@@ -14,8 +14,5 @@ then
     exit
 fi
 
-if [ $SLEEP = 'y' ]
-then sleep 2
-fi
-
-gst-launch-1.0 -v filesrc location=$FILE ! qtdemux ! video/x-h264 ! h264parse ! rtph264pay config-interval=1 ! udpsink host=$IP port=9001
+#gst-launch-1.0 -v filesrc location=$FILE ! qtdemux ! video/x-h264 ! h264parse ! rtph264pay config-interval=1 ! udpsink host=$IP port=9001
+ffmpeg -re -i $FILE -ar 8000 -f mulaw -f rtp rtp://$IP:9001
