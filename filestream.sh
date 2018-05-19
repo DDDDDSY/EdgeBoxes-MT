@@ -15,4 +15,6 @@ then
 fi
 
 #gst-launch-1.0 -v filesrc location=$FILE ! qtdemux ! video/x-h264 ! h264parse ! rtph264pay config-interval=1 ! udpsink host=$IP port=9001
-ffmpeg -re -i $FILE -ar 8000 -f mulaw -f rtp rtp://$IP:9001
+#ffmpeg -re -i $FILE -an -f rtp rtp://$IP:9001
+
+ffmpeg -re -i $FILE -an -f mpegts udp://$IP:9001
