@@ -4,7 +4,7 @@ import threading
 from multiprocessing import Process, Queue
 import time
 
-from classes import readerNetwork, generator, predictor
+from classes import senderNetwork, readerNetwork, generator, predictor
 reader = readerNetwork
 from functions import draw_boxes
 
@@ -14,6 +14,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("gen_threads", help="Specify number of generation threads")
 parser.add_argument("pred_threads", help="Specify number of prediction threads")
 parser.add_argument("visualize", help="Display video? y/n")
+parser.add_argument("ipaddress", help="IP of CNN")
 args = parser.parse_args()
 
 #file = "input.mp4"
@@ -35,6 +36,9 @@ Predictor = predictor(Generator, int(args.pred_threads))
 predictorThread = threading.Thread(target = Predictor.predict)
 predictorThread.daemon = True
 predictorThread.start()
+
+### Send boxes over network setup ###
+network = senderNetwork(9002, args.ipaddress)
 
 ### MAIN ###
 
@@ -63,6 +67,8 @@ try:
 
     fps = 1/(time.time()-beginning)
     print("FPS: ", int(fps))
+    
+    network.sendBoxes(video_frame, boxes)
 
     if args.visualize == 'y':
       frame = draw_boxes(boxes, edgearray)

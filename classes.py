@@ -2,6 +2,38 @@ import cv2
 import numpy as np
 from multiprocessing import Process, Queue
 import math
+import pickle
+import socket
+
+class senderNetwork:
+
+    def __init__(self, port, ipaddress):
+    
+        self.UDP_IP = str(ipaddress) #IP of network interface to be used
+        self.sock = socket.socket(socket.AF_INET, # Internet
+                                  socket.SOCK_DGRAM) # UDP
+        self.UDP_PORT = port
+
+    #Transmit boxes and frame
+    def sendBoxes(self, frame, boxes):
+    
+        frame = frame*255 #Convert to value in [0,255] for compression
+        frame = frame.astype(np.uint8)
+        encode_param = [int(cv2.IMWRITE_JPEG_QUALITY), 50]
+        img_str = cv2.imencode('.jpg', frame, encode_param)[1].tostring() #compress
+        
+        boxes_str = pickle.dumps(boxes) #serialize
+
+        payload = [img_str, boxes_str] #combine into single package for ease of parsing
+        serialized_payload = pickle.dumps(payload) #serialize
+        
+        try:
+          self.sock.sendto(serialized_payload,
+                           (self.UDP_IP, self.UDP_PORT))
+        except OSError as inst:
+          print(inst)
+          pass
+    
 
 #Pull feed from udp stream
 class readerNetwork:
