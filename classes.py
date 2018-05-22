@@ -22,6 +22,7 @@ class senderNetwork:
         encode_param = [int(cv2.IMWRITE_JPEG_QUALITY), 50]
         img_str = cv2.imencode('.jpg', frame, encode_param)[1].tostring() #compress
         
+        boxes = boxes.astype(np.uint16) #reduce size for network
         boxes_str = pickle.dumps(boxes) #serialize
 
         payload = [img_str, boxes_str] #combine into single package for ease of parsing
@@ -185,7 +186,7 @@ class predictor:
         
         self.framenum = 0 #keep track of how many frames have been processed
         
-        self.boxGenerator = cv2.ximgproc.createEdgeBoxes(maxBoxes = 100,
+        self.boxGenerator = cv2.ximgproc.createEdgeBoxes(maxBoxes = 1000,
                                                     alpha = 0.65,
                                                     beta = 0.75,
                                                     minScore = 0.03)
