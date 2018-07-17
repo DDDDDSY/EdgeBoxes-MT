@@ -13,3 +13,5 @@ Usage:
    *gen_threads and pred_threads are integers. visualize is y/n
 
 gen_threads refers to how many threads are used for generating edge maps. pred_threads refers to how many threads are used for predicting bounding boxes from edge maps. A good ratio is 2:1, or any multiple of said ratio.
+
+Inputs for edgeboxes are in classes.py. They consist of a file-reading class and a network-receiving class. Each can be passed into a generator as the video parameter.
